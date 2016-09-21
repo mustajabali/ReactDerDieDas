@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Der Die Das App</title>
+  </head>
+  <body>
+    <h1>Der Die Das App</h1>
+    <div id="container">
+    </div>
+    <script src="build/react.js"></script>
+    <script src="build/react-dom.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.24/browser.min.js"></script>
+    <!-- Firebase -->
+    <script src="https://cdn.firebase.com/js/client/2.4.2/firebase.js"></script>
+
+    <!-- ReactFire -->
+    <script src="https://cdn.firebase.com/libs/reactfire/0.6.0/reactfire.min.js"></script>
+
+
+    <script type="text/babel">
+      var DerDieDasList = React.createClass({
+        render: function() {
+          var _this = this;
+          var createItem = function(item, index) {
+            return (
+              <li key={ index }>
+                { item.word }
+                <span onClick={ _this.props.removeItem.bind(null, item['.key']) }
+                      style={{ color: 'red', marginLeft: '10px', cursor: 'pointer' }}>
+                  X
+                </span>
+              </li>
+            );
+          };
+          return <ul>{ this.props.items.map(createItem) }</ul>;
+        }
+      });
+
+      var DerDieDasApp = React.createClass({
+        mixins: [ReactFireMixin],
+
+        getInitialState: function() {
+          return {
+            items: [],
+            word: '',
+            plural: '',
+            meaning: '',
+            derDieDas: ''
+          };
+        },
+
+        componentWillMount: function() {
+          var firebaseRef = new Firebase("https://db4derdiedas.firebaseio.com/words");
+          this.bindAsArray(firebaseRef.limitToLast(25), 'items');
+        },
+
+        onWordChange: function(e) {
+          this.setState({word: e.target.value});
+        },
+
+        onPluralChange: function(e) {
+          this.setState({plural: e.target.value});
+        },
+
+        onMeaningChange: function(e) {
+          this.setState({meaning: e.target.value});
+        },
+
+        onDerDieDasChange: function(e) {
+          this.setState({derDieDas: e.target.value});
+        },
+
+        removeItem: function(key) {
+          var firebaseRef = new Firebase("https://db4derdiedas.firebaseio.com/words");
+          firebaseRef.child(key).remove();
+        },
+
+        handleSubmit: function(e) {
+          e.preventDefault();
+          if (this.state.word && this.state.word.trim().length !== 0 && (this.state.derDieDas && this.state.derDieDas.trim().length !== 0 && this.state.derDieDas.trim()!='-select-') ) {
+            this.firebaseRefs['items'].push({
+              word: this.state.word,
+              plural: this.state.plural,
+              meaning: this.state.meaning,
+              derDieDas: this.state.derDieDas
+            });
+            this.setState({
+              word: '',
+              plural: '',
+              meaning: '',
+              derDieDas: document.getElementById('sel').selectedIndex = 0
+            });
+          }
+        },
+
+        render: function() {
+          return (
+            <div>
+              <DerDieDasList items={ this.state.items } removeItem={ this.removeItem } />
+              <form onSubmit={ this.handleSubmit }>
+                <div>
+                  Word: <input onChange={ this.onWordChange } value={ this.state.word } />
+                </div>
+                <div>
+                  Plural: <input onChange={ this.onPluralChange } value={ this.state.plural } />
+                </div>
+                <div>
+                  Meaning: <input onChange={ this.onMeaningChange } value={ this.state.meaning } />
+                </div>
+                <div>
+                  Der-Die-Das: 
+                  <select id="sel" onChange={ this.onDerDieDasChange } >
+                      <option>-select-</option>
+                      <option>DER</option>
+                      <option>DIE</option>
+                      <option>DAS</option>
+                  </select>
+                  
+                </div>
+                <button>{ 'Add #' + (this.state.items.length + 1) }</button>
+              </form>
+            </div>
+          );
+        }
+      });
+
+      ReactDOM.render(<DerDieDasApp />, document.getElementById('container'));
+    </script>
+  </body>
+</html>
