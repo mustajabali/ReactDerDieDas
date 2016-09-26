@@ -25,7 +25,7 @@
           var createItem = function(item, index) {
             return (
               <li key={ index }>
-                { item.word }
+                { item.noun }
                 <span onClick={ _this.props.removeItem.bind(null, item['.key']) }
                       style={{ color: 'red', marginLeft: '10px', cursor: 'pointer' }}>
                   X
@@ -43,16 +43,21 @@
         getInitialState: function() {
           return {
             items: [],
-            word: '',
+            objs: [],
+            noun: '',
             plural: '',
             meaning: '',
-            derDieDas: ''
+            artikel: '',
+            correct: '',
+            shown: false
           };
         },
 
         componentWillMount: function() {
-          var firebaseRef = new Firebase("https://db4derdiedas.firebaseio.com/words");
-          this.bindAsArray(firebaseRef.limitToLast(25), 'items');
+          var firebaseRef = new Firebase("https://db4derdiedas.firebaseio.com/androidapp");
+          this.bindAsObject(firebaseRef, "objs");
+          this.bindAsArray(firebaseRef, 'items');
+
         },
 
         onWordChange: function(e) {
@@ -72,24 +77,32 @@
         },
 
         removeItem: function(key) {
-          var firebaseRef = new Firebase("https://db4derdiedas.firebaseio.com/words");
+          var firebaseRef = new Firebase("https://db4derdiedas.firebaseio.com/androidapp");
           firebaseRef.child(key).remove();
         },
 
         handleSubmit: function(e) {
           e.preventDefault();
+          //var firebaseRef = new Firebase("https://db4derdiedas.firebaseio.com/words");
+          //this.bindAsObject(firebaseRef, "objs");
+          //console.log(this.state.objs);
+          console.log(JSON.stringify(this.state.objs));
           if (this.state.word && this.state.word.trim().length !== 0 && (this.state.derDieDas && this.state.derDieDas.trim().length !== 0 && this.state.derDieDas.trim()!='-select-') ) {
             this.firebaseRefs['items'].push({
-              word: this.state.word,
+              noun: this.state.word,
               plural: this.state.plural,
               meaning: this.state.meaning,
-              derDieDas: this.state.derDieDas
+              artikel: this.state.derDieDas,
+              correct: 'NOT_SELECTED',
+              shown: false,
             });
             this.setState({
               word: '',
               plural: '',
               meaning: '',
-              derDieDas: document.getElementById('sel').selectedIndex = 0
+              correct: 'NOT_SELECTED',
+              shown: false,
+              artikel: document.getElementById('sel').selectedIndex = 0
             });
           }
         },
@@ -109,14 +122,14 @@
                   Meaning: <input onChange={ this.onMeaningChange } value={ this.state.meaning } />
                 </div>
                 <div>
-                  Der-Die-Das: 
+                  Der-Die-Das:
                   <select id="sel" onChange={ this.onDerDieDasChange } >
                       <option>-select-</option>
                       <option>DER</option>
                       <option>DIE</option>
                       <option>DAS</option>
                   </select>
-                  
+
                 </div>
                 <button>{ 'Add #' + (this.state.items.length + 1) }</button>
               </form>
