@@ -25,7 +25,7 @@
           var createItem = function(item, index) {
             return (
               <li key={ index }>
-                { item.noun }
+                { item.noun }, { item.plural }, { item.meaning }, { item.artikel }
                 <span onClick={ _this.props.removeItem.bind(null, item['.key']) }
                       style={{ color: 'red', marginLeft: '10px', cursor: 'pointer' }}>
                   X
@@ -54,7 +54,7 @@
         },
 
         componentWillMount: function() {
-          var firebaseRef = new Firebase("https://db4derdiedas.firebaseio.com/androidapp");
+          var firebaseRef = new Firebase("https://db4derdiedas.firebaseio.com/level1");
           this.bindAsObject(firebaseRef, "objs");
           this.bindAsArray(firebaseRef, 'items');
 
@@ -77,7 +77,7 @@
         },
 
         removeItem: function(key) {
-          var firebaseRef = new Firebase("https://db4derdiedas.firebaseio.com/androidapp");
+          var firebaseRef = new Firebase("https://db4derdiedas.firebaseio.com/level1");
           firebaseRef.child(key).remove();
         },
 
